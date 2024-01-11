@@ -1,12 +1,16 @@
 const express =  require ('express')       // importing express from node modules in index.js  which is used for creating server 
 const mongoose = require ('mongoose')   // importing mongoose libarary which is used for connecting mongo db 
-const  istFunction =require('./controllers/userController')
-const  secondfunction =require('./controllers/userController')
+const bodyParser =require('body-parser')
+const {registerController , loginController , logoutController} = require ('./controllers/userController')
+
 
 
 
 
 const app = express()     //  declaring a variable  app in which express function is called 
+// app.use(express.json())   // using express encoding itself 
+app.use(bodyParser.json())   //using third party libarary 
+
 
 // configuring env so that  we can save senstive data in protected file 
 require('dotenv').config();
@@ -30,8 +34,11 @@ if(mongoose.connect(url)){
 
 // routes 
 
-app.get('/home', istFunction)
-app.get('/get/gallery', secondfunction )
+
+
+app.post('/user/register' , registerController)
+app.post('/user/login' , loginController)
+app.post('/user/logout' , logoutController)
 
 
   //  starting a server 

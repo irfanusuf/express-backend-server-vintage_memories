@@ -1,14 +1,66 @@
+const User = require('../models/userModel')
+const bcrypt = require('bcrypt')
 
- function istFunction (req, res) {
-    res.send('Hello World')
+
+const registerController = async (req, res) => {
+
+
+  try {
+    const { username, email, password } = req.body
+    const existingUser = await User.findOne({ email })
+
+
+    
+
+    if (username !== "") {
+      if (!existingUser) {
+
+
+
+        const hashedPassword = await bcrypt.hash(password, 10)
+        const newUser = new User({ username, email, password: hashedPassword })
+        await newUser.save()
+        res.status(201).json({ message: "user created" })
+
+      }
+      else {
+
+        res.json({ message: "user Already Exits" })
+      }
+
+    }
+
+    else {
+      res.status(401).json({ message: "All credentials Required" })
+    }
+
   }
-  
-  
- function secondfunction (req, res) {
-    res.send('no gallery is here ... it s yet to be created ')
+  catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "Server Error" })
   }
-  
+
+}
 
 
-  module.exports = istFunction
-  module.exports = secondfunction
+
+
+
+
+
+const loginController = (req, res) => {
+
+
+}
+
+
+
+
+const logoutController = (req, res) => {
+
+
+}
+
+
+
+module.exports = { registerController, loginController, logoutController }
