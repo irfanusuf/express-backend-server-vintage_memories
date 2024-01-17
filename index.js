@@ -14,7 +14,7 @@ app.use(bodyParser.json()) //  using third party libarary
 
 // configuring env so that  we can save senstive data in protected file 
 require('dotenv').config();
-const Port = process.env.PORT     // declaring a variable and passing a value of from env
+const Port = process.env.PORT      // declaring a variable and passing a value of from env
 const url = process.env.MONGO_URL // declaring a variable url and passing a value of from env
 
 
