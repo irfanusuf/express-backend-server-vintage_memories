@@ -4,7 +4,8 @@ const bodyParser = require('body-parser')
 const { registerController,
   loginController,
   logoutController,
-  forgotpassController } = require('./controllers/userController')
+  forgotpassController,
+  changepassController } = require('./controllers/userController')
 
 
 const app = express()      //  declaring a variable  app in which express function is called 
@@ -29,14 +30,15 @@ if (mongoose.connect(url)) {
 
 
 
-
+  
 
 // routes 
-app.get('/', (req, res) => { res.send("helloworld") })
+app.get('/home', (req, res) => { res.send("helloworld") })
 app.post('/user/register', registerController)
 app.post('/user/login', loginController)
 app.post('/user/logout', logoutController)
 app.post('/user/forgotPassword', forgotpassController)
+app.post('/user/changePassword', changepassController)
 
 
 //  starting a server      //console.log   =>template literal

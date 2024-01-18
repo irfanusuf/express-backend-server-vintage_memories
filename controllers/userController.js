@@ -59,20 +59,52 @@ const loginController = async (req, res) => {
 
 const logoutController = (req, res) => {};
 
-const forgotpassController = (req, res) => {
-  const email = req.body;
-  const isUser = User.findOne({ email });
+const forgotpassController = async (req, res) => {
 
-  if (email !== "") {
-    if (isUser) {
+  try {
+    const {email} = req.body; // u can take answer of the security question for further validation
+    const isUser = await User.findOne({ email });
 
-//   home work ..... take password from user and update the User collection and change the password with newone 
+    const _id = isUser._id
 
+    if (email !== "") {
+      if (isUser) {
+        res.json({ message: "Kindly change Ur password With newOne " , _id });
+
+        // console.log(isUser._id);
+        // security Question  validation here
+        // redirection to the new page in which new password can be saved
+      } else {
+        res.json({ message: "No user Found" });
+      }
     } else {
-      res.json({ message: "No user Found" });
+      res.json({ message: "Email required!" });
     }
-  } else {
-    res.json({ message: "Email required!" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const changepassController = async (req, res) => {
+  try {
+    const { _id, newpassWord } = req.body;
+    const hashedPassword = await bcrypt.hash(newpassWord, 10);
+
+    // const changePassword =await User.findByIdAndUpdate( _id ,  {password : hashedPassword})
+
+  //  test the above example in postman 
+    const validUser = await User.findById({ _id} );
+    if (validUser) {
+      validUser.password = hashedPassword;
+
+      await validUser.save();
+
+      res.json({ message: " password changed " });
+    } else {
+      res.json({ message: " something Went Wrong" });
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -81,4 +113,5 @@ module.exports = {
   loginController,
   logoutController,
   forgotpassController,
+  changepassController,
 };
