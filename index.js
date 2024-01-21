@@ -36,9 +36,9 @@ if (mongoose.connect(url)) {
 app.get('/home', (req, res) => { res.send("helloworld") })
 app.post('/user/register', registerController)
 app.post('/user/login', loginController)
-app.post('/user/logout', logoutController)
 app.post('/user/forgotPassword', forgotpassController)
 app.post('/user/changePassword', changepassController)
+app.post('/user/logout', logoutController)
 
 
 //  starting a server      //console.log   =>template literal
