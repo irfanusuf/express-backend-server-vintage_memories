@@ -42,13 +42,9 @@ const loginController = async (req, res) => {
             `${secretKey}`
           );
 
-        
-          res.cookie("token", token, {httpOnly : true});
+          res.cookie("token", token, { httpOnly: true });
 
           res.json({ message: "Logged In", token });
-
-
-
         } else {
           res.json({ message: "Password Doesnot Match" });
         }
@@ -66,26 +62,29 @@ const loginController = async (req, res) => {
 
 const logoutController = async (req, res) => {
   try {
-    const { token } = req.params.q;
+    const token = req.cookies.token;
 
+  
     if (token) {
-      await jwt.verify(token, `${secretKey}`, (err, decoded) => {
-        if (err) {
-          console.log(err);
-          res.json({ message: "invalid token " });
+       const  decode = await jwt.verify(token, `${secretKey}`)
+     
+        if (decode) {
+            res.clearCookie("token");
+            res.json({ message: "logged Out succesfuly" });
+          }
+          else{
+            res.json({message : "some thing Went wrong "})
+          }
         }
-
-        if (decoded) {
-          console.log(decoded);
-          res.clearCookie("token");
-          res.json({ message: "logged Out succesfuly" });
-        }
-      });
-    } else {
-      res.json({ message: "Some went Wrong " });
+     
+     else {
+      res.json({ message: "missing token" });
     }
-  } catch (error) {
-    console.log(Error);
+  }
+  
+  
+  catch (error) {
+    console.log(error);
     res.json({ message: "internal server Error " });
   }
 };
@@ -95,10 +94,12 @@ const forgotpassController = async (req, res) => {
     const { email } = req.body; // u can take answer of the security question for further validation
     const isUser = await User.findOne({ email });
 
-    const _id = isUser._id;
+    
 
     if (email !== "") {
       if (isUser) {
+
+        const _id = isUser._id;
         res.json({ message: "Kindly change Ur password With newOne ", _id });
 
         // console.log(isUser._id);
@@ -117,7 +118,8 @@ const forgotpassController = async (req, res) => {
 
 const changepassController = async (req, res) => {
   try {
-    const { _id, newpassWord } = req.body;
+    const _id = req.query._id
+    const { newpassWord } = req.body;
     const hashedPassword = await bcrypt.hash(newpassWord, 10);
 
     // this method finds user by id and updates its password then load new userinformation in memory
@@ -150,11 +152,32 @@ const changepassController = async (req, res) => {
   }
 };
 
+const deleteController = async ( req, res ) =>{
 
-// home Work 
-//   deleteuser 
-// make two controllers first in which u will take confirmation and redirect the user to deletepage 
-// delte controler payload _id        method findbyIDanddelete 
+const _id = req.query._id
+const {password} = req.body
+ try{
+   const isUser = await User.findById(_id)
+
+   const  verifyPass = bcrypt.compare(password , isUser.password )
+   if (verifyPass) {
+ 
+    await User.deleteOne({_id})
+    res.json({mesaage : "your account has been sent for deletion "})
+   }else {
+    res.json({mesaage : "something went Wrong "})
+   }
+ }
+ catch(error){
+
+  console.log(error)
+ }
+}
+
+ // home work 
+// change old password with new one 
+
+// change  old username or email with new one 
 
 module.exports = {
   registerController,
@@ -162,26 +185,6 @@ module.exports = {
   logoutController,
   forgotpassController,
   changepassController,
+  deleteController
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-// const changePassword =await User.findByIdAndUpdate( _id ,  {password : hashedPassword})
-// if (changePassword) {
-
-//   console.log(changePassword)
-//   res.json({message : "password changed "})
-// }
-// else {
-//   res.json({message : "something went wrong "})
-// }
