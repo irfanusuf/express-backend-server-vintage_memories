@@ -2,13 +2,15 @@ const express = require('express')       // importing express from node modules 
 const mongoose = require('mongoose')     // importing mongoose libarary which is used for connecting mongo db 
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const getSongsController = require('./controllers/FetchSongController ')
 const { registerController,
   loginController,
   logoutController,
   forgotpassController,
   changepassController,
   deleteController } = require('./controllers/userController')
+
+
+  const postHandler = require ('./controllers/postController')
 
 
 
@@ -43,13 +45,21 @@ if (mongoose.connect(url)) {
 // routes 
 app.get('/home', (req, res) => { res.send("helloworld") })
 
-
+// all the routes for user are below
 app.post('/user/register', registerController)
 app.post('/user/login', loginController)
 app.post('/user/forgotPassword', forgotpassController)
 app.post('/user/changePassword', changepassController)
 app.post('/user/logout', logoutController)
 app.post('/user/delete', deleteController)
+app.get('/user/getFollowers' , (req,res) => { res.send("No followers")})
+app.get('/user/getFollowing' , (req,res) => { res.send("No following")})
+
+
+// all the routes for posts are below 
+
+
+app.post('/post/new', postHandler)
 
 
 
@@ -57,8 +67,9 @@ app.post('/user/delete', deleteController)
 
 
 
-// third party server fetch call 
-app.get('/api/getSongs',  getSongsController)
+
+
+
 
 
 //  starting a server      //console.log   =>template literal

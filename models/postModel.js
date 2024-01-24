@@ -3,19 +3,18 @@ const mongoose = require ('mongoose')
 
 
 const postschema = mongoose.Schema({
+author : String,
+
 
 title : String , 
 imageUrl : String,
-author : String,
-caption : String
+caption : String,
+likeCounts: [],
+Comments : [],
+shareCounts : []
 
 
 })
-
-
-
-
-
 
 
 

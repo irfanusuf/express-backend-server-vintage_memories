@@ -6,8 +6,9 @@ const User = mongoose.model('User',  {
 
 username : String, 
 email :String,
-password : {type : String , required : true} 
-
+password : {type : String , required : true} ,
+userFollowers : [] ,
+userFollowing: []
 
 
 } )

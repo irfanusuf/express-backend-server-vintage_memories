@@ -176,7 +176,6 @@ const {password} = req.body
 
  // home work 
 // change old password with new one 
-
 // change  old username or email with new one 
 
 module.exports = {
