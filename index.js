@@ -2,6 +2,7 @@ const express = require('express')       // importing express from node modules 
 const mongoose = require('mongoose')     // importing mongoose libarary which is used for connecting mongo db 
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const multMidWare = require('./mddlewares/multer')
 const { registerController,
   loginController,
   logoutController,
@@ -59,7 +60,7 @@ app.get('/user/getFollowing' , (req,res) => { res.send("No following")})
 // all the routes for posts are below 
 
 
-app.post('/post/new', postHandler)
+app.post('/post/new',multMidWare ,postHandler)
 
 
 

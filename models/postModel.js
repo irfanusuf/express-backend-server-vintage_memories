@@ -18,7 +18,7 @@ shareCounts : []
 
 
 
-const Post  = mongoose.Model('Post' , postschema )
+const Post  = mongoose.model('Post' , postschema )
 
 
 module.exports = Post
