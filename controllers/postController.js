@@ -14,10 +14,12 @@ cloudinary.config({
 
 const postHandler = async (req, res) => {
   try {
-      const {title , image ,  caption} = req.body
+      const {title ,  caption} = req.body
+
+      const imagePath = req.file.path
      
       // const imagePath = "./uploads/path";
-      const  upload = await cloudinary.v2.uploader.upload(image , {folder :  "socialApp" })
+      const  upload = await cloudinary.v2.uploader.upload(imagePath , {folder :  "socialApp" })
        
       const imageUrl =  upload.secure_url
 
