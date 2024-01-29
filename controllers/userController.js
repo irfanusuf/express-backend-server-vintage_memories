@@ -37,8 +37,8 @@ const loginController = async (req, res) => {
       if (isUser) {
         const passVerify = await bcrypt.compare(password, isUser.password);
         if (passVerify) {
-          const token = await jwt.sign(
-            { appUser: isUser.username },
+          const token = jwt.sign(
+            { username: isUser.username , _id : isUser._id , profilepIcUrl : isUser.profilepIcUrl },
             `${secretKey}`
           );
 

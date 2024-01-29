@@ -9,7 +9,7 @@ author : String,
 title : String , 
 imageUrl : String,
 caption : String,
-likeCounts: [],
+likeCounts: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
 Comments : [],
 shareCounts : []
 
