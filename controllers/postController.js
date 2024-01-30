@@ -13,7 +13,7 @@ const postHandler = async (req, res) => {
     const { title, caption } = req.body;
 
     const imagePath = req.file.path;
-    const _id = req.query._id;       // req.user id 
+    const _id = req.query._id; // req.user id
 
     // const imagePath = "./uploads/path";
     const upload = await cloudinary.v2.uploader.upload(imagePath, {
@@ -25,11 +25,11 @@ const postHandler = async (req, res) => {
     if (imageUrl !== "") {
       const newPost = new Post({ title, imageUrl, caption });
       await newPost.save();
-      const postId = newPost._id
+      const postId = newPost._id;
 
-      await User.findByIdAndUpdate(_id, { $push: { posts: postId} });
+      await User.findByIdAndUpdate(_id, { $push: { posts: postId } });
 
-      res.status(201).json({ message: "Post Uploaded" , postId  });
+      res.status(201).json({ message: "Post Uploaded", postId });
     } else {
       res.json({ message: "select image" });
     }
@@ -42,23 +42,31 @@ const postHandler = async (req, res) => {
 const likeHandler = async (req, res) => {
   try {
     const _id = req.query.postId; //  requesting post  id
-    const userId = req.query.userId; // requesting user id
+    const username = req.query.username; // requesting username  from query 
+    const post = await Post.findById({_id})
 
 
-    if (!_id) {
+    const alreadyLiked = await post.likeCounts.includes(username);
+
+    if (!post) {
       res.json({ message: "Post not found!" });
     } else {
-      const liked = await Post.findByIdAndUpdate(_id, {
-        $push: { likeCounts: userId },
-      });
+      if (!alreadyLiked) {
+        const liked = await Post.findByIdAndUpdate(_id, {
+          $push: { likeCounts: username },
+        });
 
-
-      if (liked) {
-        res.json({ message: "U Liked This Post!" });
+        if (liked) {
+          res.json({ message: "U Liked This Post!" });
+        }
+      }else{
+        res.json({message : "Already liked the post "})
       }
+
+      
     }
   } catch (error) {
-    res.json({ message: "server Error" });
+    res.json({ message: error + "Server Error"});
   }
 };
 
