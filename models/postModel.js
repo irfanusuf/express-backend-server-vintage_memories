@@ -10,7 +10,7 @@ title : String ,
 imageUrl : String,
 caption : String,
 likeCounts: [{ type: String, ref: 'User'}],
-Comments : [],
+comments : [{ comment : String , type : String , ref : 'User'}],
 shareCounts : []
 
 

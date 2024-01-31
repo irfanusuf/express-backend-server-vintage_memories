@@ -8,11 +8,11 @@ const {
   loginController,
   logoutController,
   forgotpassController,
-  changepassController,
+  changepassController, 
   deleteController,
 } = require("./controllers/userController");
 
-const { postHandler, likeHandler } = require("./controllers/postController");
+const { postHandler, likeHandler , commentHandler , deletePostHandler}  = require("./controllers/postController");
 
 const app = express(); //  declaring a variable  app in which express function is called
 // app.use(express.json()) //  using express encoding itself
@@ -55,6 +55,9 @@ app.get("/user/getFollowing", (req, res) => {
 
 app.post("/post/new", multMidWare, postHandler);
 app.post("/post/likes", likeHandler);
+app.post("/post/comment" , commentHandler)
+app.post("/post/delete" , deletePostHandler)
+
 
 //  starting a server      //console.log   =>template literal
 app.listen(Port, console.log(`server conected on localhost : ${Port} `));

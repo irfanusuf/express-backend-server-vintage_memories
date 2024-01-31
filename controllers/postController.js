@@ -42,9 +42,8 @@ const postHandler = async (req, res) => {
 const likeHandler = async (req, res) => {
   try {
     const _id = req.query.postId; //  requesting post  id
-    const username = req.query.username; // requesting username  from query 
-    const post = await Post.findById({_id})
-
+    const username = req.query.username; // requesting username  from query
+    const post = await Post.findById({ _id });
 
     const alreadyLiked = await post.likeCounts.includes(username);
 
@@ -59,15 +58,54 @@ const likeHandler = async (req, res) => {
         if (liked) {
           res.json({ message: "U Liked This Post!" });
         }
-      }else{
-        res.json({message : "Already liked the post "})
+      } else {
+        res.json({ message: "Already liked the post " });
       }
-
-      
     }
   } catch (error) {
-    res.json({ message: error + "Server Error"});
+    res.json({ message: error + "Server Error" });
   }
 };
 
-module.exports = { postHandler, likeHandler };
+const commentHandler = async (req, res) => {
+  try {
+    const username = req.query.username;
+    const _id = req.query.postId;
+    const post = await Post.findById(_id);
+    const comment = req.body.comment;
+
+    if (post) {
+      const newComment = await post.comments.comment.push(comment);
+
+      await Post.findByIdAndUpdate(_id, {
+        $push: { comments: username },
+      });
+      if (newComment) {
+        res.json({ message: "comment Added" });
+      } else {
+        res.json({ message: "Some Error " });
+      }
+    } else {
+      res.json({ message: "Post not found!" });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const deletePostHandler = async (req, res) => {
+  try {
+    const _id = req.query.postId;
+    const deletePost = await Post.findByIdAndDelete(_id);
+
+    if (deletePost) {
+      res.json({ message: "Post Deleted" });
+    } else {
+      res.json({ message: "Some Error : may be post is already deleted " });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = { postHandler, likeHandler, commentHandler , deletePostHandler };
