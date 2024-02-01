@@ -51,11 +51,19 @@ const likeHandler = async (req, res) => {
       res.json({ message: "Post not found!" });
     } else {
       if (!alreadyLiked) {
-        const liked = await Post.findByIdAndUpdate(_id, {
-          $push: { likeCounts: username },
-        });
 
-        if (liked) {
+        // method of mongo db
+        // const liked = await Post.findByIdAndUpdate(_id, {
+        //   $push: { likeCounts: username },
+        // });
+
+
+
+          // other method 
+          await post.likeCounts.push(username)       // simple javascript array method 
+         const updatePost = await post.save()
+
+        if (updatePost) {
           res.json({ message: "U Liked This Post!" });
         }
       } else {
@@ -70,17 +78,16 @@ const likeHandler = async (req, res) => {
 const commentHandler = async (req, res) => {
   try {
     const username = req.query.username;
+    const comment = req.body.comment;
     const _id = req.query.postId;
     const post = await Post.findById(_id);
-    const comment = req.body.comment;
+    
 
     if (post) {
-      const newComment = await post.comments.comment.push(comment);
-
-      await Post.findByIdAndUpdate(_id, {
-        $push: { comments: username },
-      });
-      if (newComment) {
+      await post.comments.push({comment: comment , username : username});
+      const commentAdded = post.save()
+     
+      if (commentAdded) {
         res.json({ message: "comment Added" });
       } else {
         res.json({ message: "Some Error " });
