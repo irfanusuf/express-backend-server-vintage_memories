@@ -1,11 +1,21 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { Error } = require("mongoose");
+const nodeMailer = require("nodemailer");
+
 const secretKey = process.env.SECRET_KEY;
 
 //register function whenever this function will be called it will accept payload in json username ,email......
 //password and save that data in mongo document User
+
+const transporter = nodeMailer.createTransport({
+  service: "gmail",
+  secure: "false",
+  auth: {
+    user: "irfanusuf33@gmail.com",
+    pass: "ntal lwci fsvl jjjp",
+  },
+});
 
 const registerController = async (req, res) => {
   try {
@@ -38,7 +48,11 @@ const loginController = async (req, res) => {
         const passVerify = await bcrypt.compare(password, isUser.password);
         if (passVerify) {
           const token = jwt.sign(
-            { username: isUser.username , _id : isUser._id , profilepIcUrl : isUser.profilepIcUrl },
+            {
+              username: isUser.username,
+              _id: isUser._id,
+              profilepIcUrl: isUser.profilepIcUrl,
+            },
             `${secretKey}`
           );
 
@@ -64,26 +78,19 @@ const logoutController = async (req, res) => {
   try {
     const token = req.cookies.token;
 
-  
     if (token) {
-       const  decode = await jwt.verify(token, `${secretKey}`)
-     
-        if (decode) {
-            res.clearCookie("token");
-            res.json({ message: "logged Out succesfuly" });
-          }
-          else{
-            res.json({message : "some thing Went wrong "})
-          }
-        }
-     
-     else {
+      const decode = await jwt.verify(token, `${secretKey}`);
+
+      if (decode) {
+        res.clearCookie("token");
+        res.json({ message: "logged Out succesfuly" });
+      } else {
+        res.json({ message: "some thing Went wrong " });
+      }
+    } else {
       res.json({ message: "missing token" });
     }
-  }
-  
-  
-  catch (error) {
+  } catch (error) {
     console.log(error);
     res.json({ message: "internal server Error " });
   }
@@ -94,15 +101,26 @@ const forgotpassController = async (req, res) => {
     const { email } = req.body; // u can take answer of the security question for further validation
     const isUser = await User.findOne({ email });
 
-    
+    const mailOptions = {
+      from: "irfanusuf33@gmail.com",
+      to: `${email}`,
+      subject: "Link For Changing Password",
+      text: " some text ",
+    };
 
     if (email !== "") {
       if (isUser) {
+        // const _id = isUser._id;
 
-        const _id = isUser._id;
-        res.json({ message: "Kindly change Ur password With newOne ", _id });
+        await transporter.sendMail(mailOptions);
 
-        // console.log(isUser._id);
+        res.json({
+          message:
+            " kindly check ur mail .We have provided a link for changing password ",
+        });
+
+        // res.json({ message: "Kindly change Ur password With newOne ", _id });
+
         // security Question  validation here
         // redirection to the new page in which new password can be saved
       } else {
@@ -118,7 +136,7 @@ const forgotpassController = async (req, res) => {
 
 const changepassController = async (req, res) => {
   try {
-    const _id = req.query._id
+    const _id = req.query._id;
     const { newpassWord } = req.body;
     const hashedPassword = await bcrypt.hash(newpassWord, 10);
 
@@ -152,31 +170,27 @@ const changepassController = async (req, res) => {
   }
 };
 
-const deleteController = async ( req, res ) =>{
+const deleteController = async (req, res) => {
+  const _id = req.query._id;
+  const { password } = req.body;
+  try {
+    const isUser = await User.findById(_id);
 
-const _id = req.query._id
-const {password} = req.body
- try{
-   const isUser = await User.findById(_id)
+    const verifyPass = bcrypt.compare(password, isUser.password);
+    if (verifyPass) {
+      await User.deleteOne({ _id });
+      res.json({ mesaage: "your account has been sent for deletion " });
+    } else {
+      res.json({ mesaage: "something went Wrong " });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-   const  verifyPass = bcrypt.compare(password , isUser.password )
-   if (verifyPass) {
- 
-    await User.deleteOne({_id})
-    res.json({mesaage : "your account has been sent for deletion "})
-   }else {
-    res.json({mesaage : "something went Wrong "})
-   }
- }
- catch(error){
-
-  console.log(error)
- }
-}
-
- // home work 
-// change old password with new one 
-// change  old username or email with new one 
+// home work
+// change old password with new one
+// change  old username or email with new one
 
 module.exports = {
   registerController,
@@ -184,6 +198,5 @@ module.exports = {
   logoutController,
   forgotpassController,
   changepassController,
-  deleteController
+  deleteController,
 };
-

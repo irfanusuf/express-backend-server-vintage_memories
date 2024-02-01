@@ -44,6 +44,7 @@ app.post("/user/forgotPassword", forgotpassController);
 app.post("/user/changePassword", changepassController);
 app.post("/user/logout", logoutController);
 app.post("/user/delete", deleteController);
+
 app.get("/user/getFollowers", (req, res) => {
   res.send("No followers");
 });
