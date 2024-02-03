@@ -39,6 +39,8 @@ const postHandler = async (req, res) => {
   }
 };
 
+// home work
+// validate user who likes the post and user should be in db  and second user should be logged in  
 const likeHandler = async (req, res) => {
   try {
     const _id = req.query.postId; //  requesting post  id
@@ -53,11 +55,13 @@ const likeHandler = async (req, res) => {
       if (!alreadyLiked) {
 
         // method of mongo db
-        // const liked = await Post.findByIdAndUpdate(_id, {
-        //   $push: { likeCounts: username },
-        // });
+        const liked = await Post.findByIdAndUpdate(_id, {
+          $push: { likeCounts: username },
+        });
 
 
+
+      
 
           // other method 
           await post.likeCounts.push(username)       // simple javascript array method 
@@ -74,18 +78,30 @@ const likeHandler = async (req, res) => {
     res.json({ message: error + "Server Error" });
   }
 };
-
+// home work
+// validate user who likes the post and user should be in db  and second user should be logged in  
 const commentHandler = async (req, res) => {
   try {
     const username = req.query.username;
     const comment = req.body.comment;
     const _id = req.query.postId;
+
+
     const post = await Post.findById(_id);
-    
+
+
+  
 
     if (post) {
+
+  // const addComment = await Post.findByIdAndUpdate(_id , {
+
+  //     $push : {comments : {comment : comment , username  : username }}
+  //   })
+
+
       await post.comments.push({comment: comment , username : username});
-      const commentAdded = post.save()
+      const commentAdded = await post.save()
      
       if (commentAdded) {
         res.json({ message: "comment Added" });
