@@ -53,10 +53,11 @@ const loginController = async (req, res) => {
               _id: isUser._id,
               profilepIcUrl: isUser.profilepIcUrl,
             },
-            `${secretKey}`
+            "sevensprings"
           );
 
-          res.cookie("token", token, { httpOnly: true });
+          res.cookie("username" , username ,{ httpOnly: true });
+
 
           res.json({ message: "Logged In", token });
         } else {

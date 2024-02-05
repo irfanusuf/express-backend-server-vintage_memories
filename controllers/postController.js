@@ -44,8 +44,12 @@ const postHandler = async (req, res) => {
 const likeHandler = async (req, res) => {
   try {
     const _id = req.query.postId; //  requesting post  id
-    const username = req.query.username; // requesting username  from query
+    const username = req.username; // requesting username  from query / cookies 
+
+
     const post = await Post.findById({ _id });
+
+ 
 
     const alreadyLiked = await post.likeCounts.includes(username);
 
@@ -55,9 +59,9 @@ const likeHandler = async (req, res) => {
       if (!alreadyLiked) {
 
         // method of mongo db
-        const liked = await Post.findByIdAndUpdate(_id, {
-          $push: { likeCounts: username },
-        });
+        // const liked = await Post.findByIdAndUpdate(_id, {
+        //   $push: { likeCounts: username },
+        // });
 
 
 
@@ -75,18 +79,18 @@ const likeHandler = async (req, res) => {
       }
     }
   } catch (error) {
-    res.json({ message: error + "Server Error" });
+    res.json({ message: error });
   }
 };
 // home work
 // validate user who likes the post and user should be in db  and second user should be logged in  
 const commentHandler = async (req, res) => {
   try {
-    const username = req.query.username;
+    const username = req.cookies.username;
     const comment = req.body.comment;
     const _id = req.query.postId;
 
-
+    console.log(username)
     const post = await Post.findById(_id);
 
 

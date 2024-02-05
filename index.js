@@ -12,10 +12,18 @@ const {
   deleteController,
 } = require("./controllers/userController");
 
+
+const IsAuthenticated = require ('./mddlewares/auth')
+
+
+
 const { postHandler, likeHandler , commentHandler , deletePostHandler}  = require("./controllers/postController");
 
 const app = express(); //  declaring a variable  app in which express function is called
 // app.use(express.json()) //  using express encoding itself
+  
+
+
 
 app.use(bodyParser.json()); //  using third party libarary
 app.use(cookieParser());
@@ -55,9 +63,9 @@ app.get("/user/getFollowing", (req, res) => {
 // all the routes for posts are below
 
 app.post("/post/new", multMidWare, postHandler);
-app.post("/post/likes", likeHandler);
-app.post("/post/comment" , commentHandler)
-app.post("/post/delete" , deletePostHandler)
+app.post("/post/likes", IsAuthenticated,likeHandler);
+app.post("/post/comment" ,IsAuthenticated, commentHandler)
+app.post("/post/delete" ,IsAuthenticated, deletePostHandler)
 
 
 //  starting a server      //console.log   =>template literal
