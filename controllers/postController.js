@@ -13,9 +13,8 @@ const postHandler = async (req, res) => {
     const { title, caption } = req.body;
 
     const imagePath = req.file.path;
-    const _id = req.query._id; // req.user id
+    const { userId } = req.query;
 
-    // const imagePath = "./uploads/path";
     const upload = await cloudinary.v2.uploader.upload(imagePath, {
       folder: "socialApp",
     });
@@ -25,9 +24,10 @@ const postHandler = async (req, res) => {
     if (imageUrl !== "") {
       const newPost = new Post({ title, imageUrl, caption });
       await newPost.save();
+
       const postId = newPost._id;
 
-      await User.findByIdAndUpdate(_id, { $push: { posts: postId } });
+      await User.findByIdAndUpdate(userId, { $push: { posts: postId } });
 
       res.status(201).json({ message: "Post Uploaded", postId });
     } else {
@@ -39,37 +39,28 @@ const postHandler = async (req, res) => {
   }
 };
 
-// home work
-// validate user who likes the post and user should be in db  and second user should be logged in  
 const likeHandler = async (req, res) => {
   try {
-    const _id = req.query.postId; //  requesting post  id
-    const username = req.username; // requesting username  from query / cookies 
+    const { userId } = req.query;
+    const { postId } = req.query; //  requesting post  id
+    //const username = req.info.username; // requesting username  from query / cookies
 
+    const post = await Post.findById(postId);
 
-    const post = await Post.findById({ _id });
-
- 
-
-    const alreadyLiked = await post.likeCounts.includes(username);
+    const alreadyLiked = false; //await post.likeCounts.includes(username);
 
     if (!post) {
       res.json({ message: "Post not found!" });
     } else {
       if (!alreadyLiked) {
-
         // method of mongo db
         // const liked = await Post.findByIdAndUpdate(_id, {
         //   $push: { likeCounts: username },
         // });
 
-
-
-      
-
-          // other method 
-          await post.likeCounts.push(username)       // simple javascript array method 
-         const updatePost = await post.save()
+        // other method
+        await post.likeCounts.push({ user: userId }); // simple javascript array method
+        const updatePost = await post.save();
 
         if (updatePost) {
           res.json({ message: "U Liked This Post!" });
@@ -82,31 +73,24 @@ const likeHandler = async (req, res) => {
     res.json({ message: error });
   }
 };
-// home work
-// validate user who likes the post and user should be in db  and second user should be logged in  
+
 const commentHandler = async (req, res) => {
   try {
-    const username = req.cookies.username;
+    const userId = req.info._id;
     const comment = req.body.comment;
-    const _id = req.query.postId;
+    const { postId } = req.query;
 
-    console.log(username)
-    const post = await Post.findById(_id);
-
-
-  
+    const post = await Post.findById(postId);
 
     if (post) {
+      // const addComment = await Post.findByIdAndUpdate(_id , {
 
-  // const addComment = await Post.findByIdAndUpdate(_id , {
+      //     $push : {comments : {comment : comment , username  : username }}
+      //   })
 
-  //     $push : {comments : {comment : comment , username  : username }}
-  //   })
+      await post.comments.push({ comment: comment, user: userId });
+      const commentAdded = await post.save();
 
-
-      await post.comments.push({comment: comment , username : username});
-      const commentAdded = await post.save()
-     
       if (commentAdded) {
         res.json({ message: "comment Added" });
       } else {
@@ -120,19 +104,120 @@ const commentHandler = async (req, res) => {
   }
 };
 
+// homeWork right now any one with token can delete this post but only owner of this shoulb be able to del this post
+// above one is not so important
+
+// after delteing the post by this method .....post's Id should also be delted from user's post array
 const deletePostHandler = async (req, res) => {
   try {
-    const _id = req.query.postId;
-    const deletePost = await Post.findByIdAndDelete(_id);
+    const { postId } = req.query;
+
+    const deletePost = await Post.findByIdAndDelete(postId);
 
     if (deletePost) {
       res.json({ message: "Post Deleted" });
     } else {
-      res.json({ message: "Some Error : may be post is already deleted " });
+      res.json({ message: "Some Error : post not found  " });
     }
   } catch (error) {
     console.log(error);
   }
 };
 
-module.exports = { postHandler, likeHandler, commentHandler , deletePostHandler };
+const deleteCommentHandler = async (req, res) => {
+  try {
+    // const {userId} = req.info._id
+    const {postId} = req.query;
+    const {commentId} = req.query;
+
+    const post = await Post.findById(postId);
+
+    const indexOfdelComment = await post.comments.findIndex(
+      (comment) => comment._id.toString() === commentId
+    );
+
+    const delComment = await post.comments.splice(indexOfdelComment, 1);
+
+    if (delComment) {
+      await post.save();
+    }
+
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+module.exports = {
+  postHandler,
+  likeHandler,
+  commentHandler,
+  deletePostHandler,
+  deleteCommentHandler,
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const userId = req.info._id;
+
+// const user = await User.findById(userId);
+
+// const containsPost = await user.posts.includes(postId);
+// console.log(containsPost);
+// const deletepostindex = await user.posts.findIndex(post => post.toString() === postId)
+// console.log(deletepostindex);
+
+// const deletefromUserArr = await user.posts.splice(deletepostindex,1)
+
+// await user.save()
+
+// console.log(deletefromUserArr);

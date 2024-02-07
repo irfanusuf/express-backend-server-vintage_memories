@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const IsAuthenticated = async (req, res, next) => {
   try {
     const { token } = req.headers;
-    const secretKey = process.env.SECRET_KEY;
+    // const secretKey = process.env.SECRET_KEY;
 
     if (!token) {
       return res.json({ message: "Forbidden" });
@@ -12,9 +12,12 @@ const IsAuthenticated = async (req, res, next) => {
         if (err) {
           res.json({ message: "Unauthorized" });
         } else {
-          const username = decode.username;
 
-          console.log(username);
+          console.log(decode)
+
+          
+          req.info = decode;
+
           return next();
         }
       });

@@ -8,22 +8,22 @@ const {
   loginController,
   logoutController,
   forgotpassController,
-  changepassController, 
+  changepassController,
   deleteController,
 } = require("./controllers/userController");
 
+const IsAuthenticated = require("./mddlewares/auth");
 
-const IsAuthenticated = require ('./mddlewares/auth')
-
-
-
-const { postHandler, likeHandler , commentHandler , deletePostHandler}  = require("./controllers/postController");
+const {
+  postHandler,
+  likeHandler,
+  commentHandler,
+  deletePostHandler,
+  deleteCommentHandler,
+} = require("./controllers/postController");
 
 const app = express(); //  declaring a variable  app in which express function is called
 // app.use(express.json()) //  using express encoding itself
-  
-
-
 
 app.use(bodyParser.json()); //  using third party libarary
 app.use(cookieParser());
@@ -63,10 +63,14 @@ app.get("/user/getFollowing", (req, res) => {
 // all the routes for posts are below
 
 app.post("/post/new", multMidWare, postHandler);
-app.post("/post/likes", IsAuthenticated,likeHandler);
-app.post("/post/comment" ,IsAuthenticated, commentHandler)
-app.post("/post/delete" ,IsAuthenticated, deletePostHandler)
+app.post("/post/likes", IsAuthenticated, likeHandler);
 
+
+app.post("/post/comment", IsAuthenticated, commentHandler);
+
+
+app.post("/post/deletePost",IsAuthenticated ,  deletePostHandler);
+app.post("/post/deleteCommment", deleteCommentHandler);
 
 //  starting a server      //console.log   =>template literal
 app.listen(Port, console.log(`server conected on localhost : ${Port} `));
