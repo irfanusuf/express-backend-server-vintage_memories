@@ -1,14 +1,9 @@
 const Post = require("../models/postModel");
-const cloudinary = require("cloudinary");
+const cloudinary = require("../utils/cloudinary");
 const User = require("../models/userModel");
+const transporter = require("../utils/nodemailer");
 
-cloudinary.config({
-  cloud_name: "dbo0xmbd7",
-  api_key: "717735839128615",
-  api_secret: "fqcjtd3HxpH_t1dAEtqr595ULW0",
-});
-
-const postHandler = async (req, res) => {
+const createNewpostHandler = async (req, res) => {
   try {
     const { title, caption } = req.body;
 
@@ -47,12 +42,14 @@ const likeHandler = async (req, res) => {
 
     const post = await Post.findById(postId);
 
-    const alreadyLiked = false; //await post.likeCounts.includes(username);
+    const alreadyLiked = await post.likeCounts.findIndex(
+      (_id) => _id.toString() === userId
+    );
 
     if (!post) {
       res.json({ message: "Post not found!" });
     } else {
-      if (!alreadyLiked) {
+      if (alreadyLiked === -1) {
         // method of mongo db
         // const liked = await Post.findByIdAndUpdate(_id, {
         //   $push: { likeCounts: username },
@@ -77,6 +74,7 @@ const likeHandler = async (req, res) => {
 const commentHandler = async (req, res) => {
   try {
     const userId = req.info._id;
+
     const comment = req.body.comment;
     const { postId } = req.query;
 
@@ -104,20 +102,32 @@ const commentHandler = async (req, res) => {
   }
 };
 
-// homeWork right now any one with token can delete this post but only owner of this shoulb be able to del this post
-// above one is not so important
-
-// after delteing the post by this method .....post's Id should also be delted from user's post array
 const deletePostHandler = async (req, res) => {
   try {
+    const userId = req.info._id;
     const { postId } = req.query;
+    const isUser = await User.findById(userId);
 
-    const deletePost = await Post.findByIdAndDelete(postId);
+    if (isUser) {
+      const deletePost = await Post.findByIdAndDelete(postId);
+      // const indexOfPostInUserArr = await isUser.posts.findIndex(
+      //   (_id) => _id.toString() === postId
+      // );
+      // console.log(indexOfPostInUserArr);
+      // const delFromUserArr = await isUser.posts.splice(0, 1);
+      // console.log(delFromUserArr)
 
-    if (deletePost) {
-      res.json({ message: "Post Deleted" });
+      const delfromArr = await User.findByIdAndUpdate(userId, {
+        $pull: { posts: postId },
+      });
+
+      if (deletePost && delfromArr) {
+        res.json({ message: "Post Deleted" });
+      } else {
+        res.json({ message: "Some Error : post not found  " });
+      }
     } else {
-      res.json({ message: "Some Error : post not found  " });
+      res.json({ message: "User not Found" });
     }
   } catch (error) {
     console.log(error);
@@ -126,9 +136,8 @@ const deletePostHandler = async (req, res) => {
 
 const deleteCommentHandler = async (req, res) => {
   try {
-    // const {userId} = req.info._id
-    const {postId} = req.query;
-    const {commentId} = req.query;
+    const { postId } = req.query;
+    const { commentId } = req.query;
 
     const post = await Post.findById(postId);
 
@@ -136,88 +145,53 @@ const deleteCommentHandler = async (req, res) => {
       (comment) => comment._id.toString() === commentId
     );
 
+    console.log(indexOfdelComment);
+
     const delComment = await post.comments.splice(indexOfdelComment, 1);
 
     if (delComment) {
       await post.save();
+      res.json({ message: "comment deleted " });
+    } else {
+      res.json({ message: "comment not found" });
     }
-
-
   } catch (err) {
     console.log(err);
   }
 };
 
+const sharePostHandler = async (req, res) => {
+  const { email } = req.body;
+  const postId = req.query;
+  const userId = req.info;
+
+  const post = await Post.findById(postId);
+
+  const author = post.author;
+  const title = post.title;
+  const image = post.imageUrl;
+  const caption = post.caption;
+  const link = "somelINk ";
+
+  const sendMail = await transporter.sendMail({
+    from: "irfanusuf33@gmail.com",
+    to: `${email}`,
+    subject: "share",
+    text: `kindly check out this post ${link} on the social app and follow this user . He is very good at  creating innovating
+    things  ${title}  ${image}   caption : ${caption} Author :  ${author} ,`,
+  });
+
+  if (sendMail) {
+    await post.shareCounts.push({ user: userId });
+    res.json({ message: "post shared " });
+  }
+};
+
 module.exports = {
-  postHandler,
+  createNewpostHandler,
   likeHandler,
   commentHandler,
   deletePostHandler,
   deleteCommentHandler,
+  sharePostHandler
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const userId = req.info._id;
-
-// const user = await User.findById(userId);
-
-// const containsPost = await user.posts.includes(postId);
-// console.log(containsPost);
-// const deletepostindex = await user.posts.findIndex(post => post.toString() === postId)
-// console.log(deletepostindex);
-
-// const deletefromUserArr = await user.posts.splice(deletepostindex,1)
-
-// await user.save()
-
-// console.log(deletefromUserArr);

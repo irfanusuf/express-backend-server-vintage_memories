@@ -8,7 +8,6 @@ const postschema = mongoose.Schema({
   imageUrl: String,
   caption: String,
   likeCounts: [
-
     {
       user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +24,14 @@ const postschema = mongoose.Schema({
       },
     },
   ],
-  shareCounts: [],
+  shareCounts: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    },
+  ],
 });
 
 const Post = mongoose.model("Post", postschema);

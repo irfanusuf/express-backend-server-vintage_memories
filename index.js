@@ -15,11 +15,12 @@ const {
 const IsAuthenticated = require("./mddlewares/auth");
 
 const {
-  postHandler,
+  createNewpostHandler,
   likeHandler,
   commentHandler,
   deletePostHandler,
   deleteCommentHandler,
+  sharePostHandler
 } = require("./controllers/postController");
 
 const app = express(); //  declaring a variable  app in which express function is called
@@ -62,15 +63,21 @@ app.get("/user/getFollowing", (req, res) => {
 
 // all the routes for posts are below
 
-app.post("/post/new", multMidWare, postHandler);
-app.post("/post/likes", IsAuthenticated, likeHandler);
+app.post("/post/new", multMidWare, createNewpostHandler);
+app.post("/post/deletePost",IsAuthenticated ,  deletePostHandler);
+
+app.post("/post/likes", IsAuthenticated, likeHandler);     // depends on user ..... like and unlike can work from single handler 
+app.post("/post/unlike", IsAuthenticated)      // make new handler for unlikes 
 
 
 app.post("/post/comment", IsAuthenticated, commentHandler);
+app.post("/post/deleteCommment",IsAuthenticated , deleteCommentHandler);
+
+app.post("/post/sharePost",IsAuthenticated , sharePostHandler);
 
 
-app.post("/post/deletePost",IsAuthenticated ,  deletePostHandler);
-app.post("/post/deleteCommment", deleteCommentHandler);
+
+
 
 //  starting a server      //console.log   =>template literal
 app.listen(Port, console.log(`server conected on localhost : ${Port} `));

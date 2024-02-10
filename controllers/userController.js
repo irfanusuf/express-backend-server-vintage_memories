@@ -1,21 +1,8 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const nodeMailer = require("nodemailer");
+const transporter = require ("../utils/nodemailer")
 
-const secretKey = process.env.SECRET_KEY;
-
-//register function whenever this function will be called it will accept payload in json username ,email......
-//password and save that data in mongo document User
-
-const transporter = nodeMailer.createTransport({
-  service: "gmail",
-  secure: "false",
-  auth: {
-    user: "irfanusuf33@gmail.com",
-    pass: "ntal lwci fsvl jjjp",
-  },
-});
 
 const registerController = async (req, res) => {
   try {
@@ -26,7 +13,19 @@ const registerController = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ username, email, password: hashedPassword });
         await newUser.save();
-        res.status(201).json({ message: "user created" });
+
+        const sendMail =  await transporter.sendMail(
+          {
+            from : "irfanusuf33@gmail.com",
+            to : `${email}`,
+            subject : "Welecome Email ",
+            text : `Welcome ${username} . Stay tuned For our upcoming Social App`
+          }
+        )
+        if(sendMail){
+            res.status(201).json({ message: "user created" });
+        }
+      
       } else {
         res.json({ message: "user Already Exits" });
       }
@@ -111,7 +110,7 @@ const forgotpassController = async (req, res) => {
 
     if (email !== "") {
       if (isUser) {
-        // const _id = isUser._id;
+    
 
         await transporter.sendMail(mailOptions);
 
@@ -120,10 +119,6 @@ const forgotpassController = async (req, res) => {
             " kindly check ur mail .We have provided a link for changing password ",
         });
 
-        // res.json({ message: "Kindly change Ur password With newOne ", _id });
-
-        // security Question  validation here
-        // redirection to the new page in which new password can be saved
       } else {
         res.json({ message: "No user Found" });
       }
@@ -189,9 +184,7 @@ const deleteController = async (req, res) => {
   }
 };
 
-// home work
-// change old password with new one
-// change  old username or email with new one
+
 
 module.exports = {
   registerController,
