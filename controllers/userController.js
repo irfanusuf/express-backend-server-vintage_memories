@@ -185,6 +185,12 @@ const deleteController = async (req, res) => {
 };
 
 
+const followUserHandler = async (req , res) =>{
+
+//home work 
+
+}
+
 
 module.exports = {
   registerController,
@@ -193,4 +199,5 @@ module.exports = {
   forgotpassController,
   changepassController,
   deleteController,
+  followUserHandler
 };

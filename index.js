@@ -3,6 +3,7 @@ const mongoose = require("mongoose"); // importing mongoose libarary which is us
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const multMidWare = require("./mddlewares/multer");
+const IsAuthenticated = require("./mddlewares/auth");
 const {
   registerController,
   loginController,
@@ -10,9 +11,9 @@ const {
   forgotpassController,
   changepassController,
   deleteController,
+  followUserHandler
 } = require("./controllers/userController");
 
-const IsAuthenticated = require("./mddlewares/auth");
 
 const {
   createNewpostHandler,
@@ -42,9 +43,6 @@ if (mongoose.connect(url)) {
 }
 
 // routes
-app.get("/home", (req, res) => {
-  res.send("helloworld");
-});
 
 // all the routes for user are below
 app.post("/user/register", registerController);
@@ -53,7 +51,7 @@ app.post("/user/forgotPassword", forgotpassController);
 app.post("/user/changePassword", changepassController);
 app.post("/user/logout", logoutController);
 app.post("/user/delete", deleteController);
-
+app.post("/user/follow" , followUserHandler)  // home work 
 app.get("/user/getFollowers", (req, res) => {
   res.send("No followers");
 });
@@ -65,14 +63,10 @@ app.get("/user/getFollowing", (req, res) => {
 
 app.post("/post/new", multMidWare, createNewpostHandler);
 app.post("/post/deletePost",IsAuthenticated ,  deletePostHandler);
-
 app.post("/post/likes", IsAuthenticated, likeHandler);     // depends on user ..... like and unlike can work from single handler 
 app.post("/post/unlike", IsAuthenticated)      // make new handler for unlikes 
-
-
 app.post("/post/comment", IsAuthenticated, commentHandler);
 app.post("/post/deleteCommment",IsAuthenticated , deleteCommentHandler);
-
 app.post("/post/sharePost",IsAuthenticated , sharePostHandler);
 
 

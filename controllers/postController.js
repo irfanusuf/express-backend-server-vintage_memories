@@ -43,7 +43,7 @@ const likeHandler = async (req, res) => {
     const post = await Post.findById(postId);
 
     const alreadyLiked = await post.likeCounts.findIndex(
-      (_id) => _id.toString() === userId
+      (user) => user._id.toString() === userId
     );
 
     if (!post) {
@@ -162,12 +162,14 @@ const deleteCommentHandler = async (req, res) => {
 
 const sharePostHandler = async (req, res) => {
   const { email } = req.body;
-  const postId = req.query;
-  const userId = req.info;
+  const { postId } = req.query;
+  const userId = req.info; // logged in user
 
   const post = await Post.findById(postId);
 
-  const author = post.author;
+  console.log(post);
+
+  const author = "irfan usuf";
   const title = post.title;
   const image = post.imageUrl;
   const caption = post.caption;
@@ -183,7 +185,10 @@ const sharePostHandler = async (req, res) => {
 
   if (sendMail) {
     await post.shareCounts.push({ user: userId });
-    res.json({ message: "post shared " });
+    const update = post.save();
+    if (update) {
+      res.json({ message: "post shared " });
+    }
   }
 };
 
@@ -193,5 +198,5 @@ module.exports = {
   commentHandler,
   deletePostHandler,
   deleteCommentHandler,
-  sharePostHandler
+  sharePostHandler,
 };
