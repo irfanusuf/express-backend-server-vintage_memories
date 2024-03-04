@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const transporter = require ("../utils/nodemailer")
 
-
+// integrated 
 const registerController = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -30,13 +30,14 @@ const registerController = async (req, res) => {
         res.json({ message: "user Already Exits" });
       }
     } else {
-      res.status(401).json({ message: "All credentials Required" });
+      res.json({ message: "All credentials Required" });
     }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 const loginController = async (req, res) => {
   try {

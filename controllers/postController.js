@@ -36,7 +36,7 @@ const createNewpostHandler = async (req, res) => {
 
 const likeHandler = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId } = req.info;
     const { postId } = req.query; //  requesting post  id
     //const username = req.info.username; // requesting username  from query / cookies
 
@@ -192,6 +192,20 @@ const sharePostHandler = async (req, res) => {
   }
 };
 
+const getAllposts = async (req, res) => {
+  try {
+    const allposts = await Post.find();
+
+    if (allposts) {
+      res.json({ message: "Posts Found!", allposts });
+    } else {
+      res.json({ message: " No posts found  " });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 module.exports = {
   createNewpostHandler,
   likeHandler,
@@ -199,4 +213,5 @@ module.exports = {
   deletePostHandler,
   deleteCommentHandler,
   sharePostHandler,
+  getAllposts,
 };

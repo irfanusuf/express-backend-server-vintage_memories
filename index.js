@@ -2,6 +2,7 @@ const express = require("express"); // importing express from node modules in in
 const mongoose = require("mongoose"); // importing mongoose libarary which is used for connecting mongo db
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const cors =require('cors')
 const multMidWare = require("./mddlewares/multer");
 const IsAuthenticated = require("./mddlewares/auth");
 const {
@@ -21,14 +22,16 @@ const {
   commentHandler,
   deletePostHandler,
   deleteCommentHandler,
-  sharePostHandler
+  sharePostHandler,
+  getAllposts
 } = require("./controllers/postController");
 
 const app = express(); //  declaring a variable  app in which express function is called
 // app.use(express.json()) //  using express encoding itself
 
-app.use(bodyParser.json()); //  using third party libarary
-app.use(cookieParser());
+app.use(bodyParser.json()); //  using third party libaray for parsing json body data 
+app.use(cookieParser());   //   using third party libaray for parsing cookies 
+app.use(cors())    // cross origin resource sharing 
 
 // configuring env so that  we can save senstive data in protected file
 require("dotenv").config();
@@ -68,6 +71,10 @@ app.post("/post/unlike", IsAuthenticated)      // make new handler for unlikes
 app.post("/post/comment", IsAuthenticated, commentHandler);
 app.post("/post/deleteCommment",IsAuthenticated , deleteCommentHandler);
 app.post("/post/sharePost",IsAuthenticated , sharePostHandler);
+
+
+
+app.get("/posts" , getAllposts);
 
 
 
