@@ -3,17 +3,21 @@ const User = require("./userModel");
 // const uuid =require("uuid")
 
 const postschema = mongoose.Schema({
-  author: String,
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
   title: String,
   imageUrl: String,
   caption: String,
+
   likeCounts: [
-    {
-      user: {
+
+ {   user :    {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-      },
-    },
+      }}
+    
   ],
   comments: [
     {

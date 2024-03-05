@@ -17,7 +17,7 @@ const createNewpostHandler = async (req, res) => {
     const imageUrl = upload.secure_url;
 
     if (imageUrl !== "") {
-      const newPost = new Post({ title, imageUrl, caption });
+      const newPost = new Post({ author: userId, title, imageUrl, caption });
       await newPost.save();
 
       const postId = newPost._id;
@@ -36,38 +36,34 @@ const createNewpostHandler = async (req, res) => {
 
 const likeHandler = async (req, res) => {
   try {
-    const { userId } = req.info;
-    const { postId } = req.query; //  requesting post  id
-    //const username = req.info.username; // requesting username  from query / cookies
+    const userId = req.info._id;
+    const { postId } = req.query; 
 
     const post = await Post.findById(postId);
 
     const alreadyLiked = await post.likeCounts.findIndex(
-      (user) => user._id.toString() === userId
+      (user) => user.user._id.toString() === userId
     );
 
     if (!post) {
       res.json({ message: "Post not found!" });
     } else {
-      if (alreadyLiked === -1) {
-        // method of mongo db
-        // const liked = await Post.findByIdAndUpdate(_id, {
-        //   $push: { likeCounts: username },
-        // });
 
-        // other method
-        await post.likeCounts.push({ user: userId }); // simple javascript array method
+     console.log(userId)
+      if (alreadyLiked === -1) {
+
+        await post.likeCounts.push({user : userId}); // simple javascript array method
         const updatePost = await post.save();
 
         if (updatePost) {
-          res.json({ message: "U Liked This Post!" });
+          res.json({ message: "U Liked This Post!"});
         }
       } else {
         res.json({ message: "Already liked the post " });
       }
     }
   } catch (error) {
-    res.json({ message: error });
+    res.json({ message: error  + "some error"});
   }
 };
 
@@ -194,7 +190,25 @@ const sharePostHandler = async (req, res) => {
 
 const getAllposts = async (req, res) => {
   try {
-    const allposts = await Post.find();
+    const allposts = await Post.find().populate([
+      {
+        path: 'author',
+        model: 'User',
+      },
+
+      {
+        path: "likeCounts.user",
+        model: "User",
+      },
+      {
+        path: "comments.user",
+        model: "User",
+      },
+      {
+        path: "shareCounts.user",
+        model: "User",
+      },
+    ]);
 
     if (allposts) {
       res.json({ message: "Posts Found!", allposts });

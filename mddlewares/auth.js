@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const IsAuthenticated = async (req, res, next) => {
   try {
-    const { token } = req.headers;
+    const {token} = req.headers;
     // const secretKey = process.env.SECRET_KEY;
 
     if (!token) {
