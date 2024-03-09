@@ -10,6 +10,9 @@ username : String,
 email :  {type : String , unique : true},
 password : {type : String , required : true} ,
 posts:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Post'}] ,
+
+likedPosts:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Post'}],
+
 userFollowers : [] ,
 userFollowing: []
 

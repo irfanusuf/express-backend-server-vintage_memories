@@ -49,17 +49,27 @@ const likeHandler = async (req, res) => {
       res.json({ message: "Post not found!" });
     } else {
 
-     console.log(userId)
+
       if (alreadyLiked === -1) {
 
         await post.likeCounts.push({user : userId}); // simple javascript array method
+        await User.findByIdAndUpdate(userId, { $push: { likedPosts: postId } });
         const updatePost = await post.save();
 
         if (updatePost) {
-          res.json({ message: "U Liked This Post!"});
+          res.json({ message: `U Liked post _${postId}`});
         }
       } else {
-        res.json({ message: "Already liked the post " });
+
+        await post.likeCounts.splice(alreadyLiked , 1)
+        await User.findByIdAndUpdate(userId, { $pull: { likedPosts: postId } });
+        const savePost = await post.save()
+
+        if(savePost){
+
+          res.json({ message: `U unliked post_${postId}` });
+        }
+            
       }
     }
   } catch (error) {

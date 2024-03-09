@@ -67,7 +67,6 @@ app.get("/user/getFollowing", (req, res) => {
 app.post("/post/new", multMidWare, createNewpostHandler);
 app.post("/post/deletePost",IsAuthenticated ,  deletePostHandler);
 app.post("/post/likes", IsAuthenticated, likeHandler);     // depends on user ..... like and unlike can work from single handler 
-app.post("/post/unlike", IsAuthenticated)      // make new handler for unlikes 
 app.post("/post/comment", IsAuthenticated, commentHandler);
 app.post("/post/deleteCommment",IsAuthenticated , deleteCommentHandler);
 app.post("/post/sharePost",IsAuthenticated , sharePostHandler);
