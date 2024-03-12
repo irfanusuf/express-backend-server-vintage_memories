@@ -7,36 +7,47 @@ const transporter = require ("../utils/nodemailer")
 const registerController = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+
+    const imagePath = req.file.path;
+
     const existingUser = await User.findOne({ email });
     if (username && email && password !== "") {
       if (!existingUser) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, email, password: hashedPassword });
-        await newUser.save();
-
-        const sendMail =  await transporter.sendMail(
-          {
-            from : "irfanusuf33@gmail.com",
-            to : `${email}`,
-            subject : "Welecome Email ",
-            text : `Welcome ${username} . Stay tuned For our upcoming Social App`
-          }
-        )
-        if(sendMail){
-            res.status(201).json({ message: "user created" });
+        const upload = await cloudinary.v2.uploader.upload(imagePath, {
+          folder: "socialApp-profilepics",
+        });
+        if (upload) {
+          const profilepIcUrl = upload.secure_url;
+          const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+            profilepIcUrl,
+          });
+          await newUser.save();
+          // await transporter.sendMail({
+          //   from: "irfanusuf33@gmail.com",
+          //   to: `${email}`,
+          //   subject: "Welecome Email ",
+          //   text: `Welcome ${username} . Stay tuned For our upcoming Social App`,
+          // });
+          res.json({ message: "User Created" });
+        } else {
+          res.json({ message: "Cloudinary Error & mail not sent" });
         }
-      
       } else {
         res.json({ message: "user Already Exits" });
       }
     } else {
-      res.json({ message: "All credentials Required" });
+      res.json({ message: "All Credentials required" });
     }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 
 const loginController = async (req, res) => {

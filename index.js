@@ -73,7 +73,7 @@ app.post("/post/sharePost",IsAuthenticated , sharePostHandler);
 
 
 
-app.get("/posts" , getAllposts);
+app.get("/posts", IsAuthenticated, getAllposts);
 
 
 
