@@ -48,7 +48,7 @@ if (mongoose.connect(url)) {
 // routes
 
 // all the routes for user are below
-app.post("/user/register", registerController);
+app.post("/user/register", multMidWare , registerController);
 app.post("/user/login", loginController);
 app.post("/user/forgotPassword", forgotpassController);
 app.post("/user/changePassword", changepassController);

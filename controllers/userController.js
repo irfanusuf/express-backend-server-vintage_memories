@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const transporter = require ("../utils/nodemailer")
+const cloudinary = require("../utils/cloudinary");
 
 // integrated 
 const registerController = async (req, res) => {
@@ -57,20 +58,21 @@ const loginController = async (req, res) => {
     if (username !== "" && password !== "") {
       if (isUser) {
         const passVerify = await bcrypt.compare(password, isUser.password);
+
         if (passVerify) {
           const token = jwt.sign(
             {
-              username: isUser.username,
-              _id: isUser._id,
-              profilepIcUrl: isUser.profilepIcUrl,
+              _id: isUser._id, 
             },
             "sevensprings"
           );
 
-          res.cookie("username" , username ,{ httpOnly: true });
+           const userId = isUser._id
+
+          // res.cookie("username" , username ,{ httpOnly: true });
 
 
-          res.json({ message: "Logged In", token });
+          res.json({ message: "Logged In", token , userId  });
         } else {
           res.json({ message: "Password Doesnot Match" });
         }
