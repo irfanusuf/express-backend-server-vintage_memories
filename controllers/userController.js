@@ -1,21 +1,19 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const transporter = require ("../utils/nodemailer")
+const transporter = require("../utils/nodemailer");
 const cloudinary = require("../utils/cloudinary");
 
-// integrated 
+// integrated
 const registerController = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-
-    const imagePath = req.file.path;
+    const { username, email, password, image } = req.body;
 
     const existingUser = await User.findOne({ email });
-    if (username && email && password !== "") {
+    if (username && email && password && image !== "") {
       if (!existingUser) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const upload = await cloudinary.v2.uploader.upload(imagePath, {
+        const upload = await cloudinary.v2.uploader.upload(image, {
           folder: "socialApp-profilepics",
         });
         if (upload) {
@@ -49,8 +47,6 @@ const registerController = async (req, res) => {
   }
 };
 
-
-
 const loginController = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -62,17 +58,16 @@ const loginController = async (req, res) => {
         if (passVerify) {
           const token = jwt.sign(
             {
-              _id: isUser._id, 
+              _id: isUser._id,
             },
             "sevensprings"
           );
 
-           const userId = isUser._id
+          const userId = isUser._id;
 
           // res.cookie("username" , username ,{ httpOnly: true });
 
-
-          res.json({ message: "Logged In", token , userId  });
+          res.json({ message: "Logged In", token, userId });
         } else {
           res.json({ message: "Password Doesnot Match" });
         }
@@ -124,15 +119,12 @@ const forgotpassController = async (req, res) => {
 
     if (email !== "") {
       if (isUser) {
-    
-
         await transporter.sendMail(mailOptions);
 
         res.json({
           message:
             " kindly check ur mail .We have provided a link for changing password ",
         });
-
       } else {
         res.json({ message: "No user Found" });
       }
@@ -198,13 +190,21 @@ const deleteController = async (req, res) => {
   }
 };
 
+const followUserHandler = async (req, res) => {
+  //home work
+};
 
-const followUserHandler = async (req , res) =>{
+const getUser = async (req, res) => {
+  const _id = req.query.userId;
 
-//home work 
+  const user = await User.findById(_id);       //time complexity log n
 
-}
-
+  if (user) {
+    res.json({ message: "user Found", user });
+  } else {
+    res.json({ message: "user Not Found" });
+  }
+};
 
 module.exports = {
   registerController,
@@ -213,5 +213,6 @@ module.exports = {
   forgotpassController,
   changepassController,
   deleteController,
-  followUserHandler
+  followUserHandler,
+  getUser,
 };

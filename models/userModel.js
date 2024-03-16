@@ -6,7 +6,7 @@ const Post =require("./postModel")
 const User = mongoose.model('User',  {
 
 profilepIcUrl : String,
-username : String,
+username : {type :String , unique :true},
 email :  {type : String , unique : true},
 password : {type : String , required : true} ,
 posts:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Post'}] ,

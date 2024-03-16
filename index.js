@@ -12,7 +12,8 @@ const {
   forgotpassController,
   changepassController,
   deleteController,
-  followUserHandler
+  followUserHandler,
+  getUser
 } = require("./controllers/userController");
 
 
@@ -48,13 +49,16 @@ if (mongoose.connect(url)) {
 // routes
 
 // all the routes for user are below
+
 app.post("/user/register", multMidWare , registerController);
 app.post("/user/login", loginController);
+app.get("/user" , getUser) 
 app.post("/user/forgotPassword", forgotpassController);
 app.post("/user/changePassword", changepassController);
 app.post("/user/logout", logoutController);
 app.post("/user/delete", deleteController);
-app.post("/user/follow" , followUserHandler)  // home work 
+app.post("/user/follow" , followUserHandler)  // home work
+
 app.get("/user/getFollowers", (req, res) => {
   res.send("No followers");
 });
