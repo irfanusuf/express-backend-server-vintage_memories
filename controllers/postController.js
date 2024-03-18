@@ -22,7 +22,7 @@ const createNewpostHandler = async (req, res) => {
 
       const postId = newPost._id;
 
-      await User.findByIdAndUpdate(userId, { $push: { posts: postId } });
+      await User.findByIdAndUpdate(userId, { $push: { posts : { post: postId }} });
 
       res.status(201).json({ message: "Post Uploaded", postId });
     } else {

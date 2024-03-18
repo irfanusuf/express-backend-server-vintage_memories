@@ -12,12 +12,12 @@ const postschema = mongoose.Schema({
   caption: String,
 
   likeCounts: [
-
- {   user :    {
+    {
+      user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-      }}
-    
+      },
+    },
   ],
   comments: [
     {
