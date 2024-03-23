@@ -5,31 +5,38 @@ const transporter = require("../utils/nodemailer");
 
 const createNewpostHandler = async (req, res) => {
   try {
-    const { title, caption } = req.body;
+    const { title, caption, image } = req.body;
 
-    const imagePath = req.file.path;
-    const { userId } = req.query;
+    // const imagePath = req.file.path;
 
-    const upload = await cloudinary.v2.uploader.upload(imagePath, {
-      folder: "socialApp",
-    });
+    if (title !== "") {
+      const userId = req.info._id;
 
-    const imageUrl = upload.secure_url;
+      const upload = await cloudinary.v2.uploader.upload(image, {
+        folder: "socialApp",
+      });
 
-    if (imageUrl !== "") {
-      const newPost = new Post({ author: userId, title, imageUrl, caption });
-      await newPost.save();
+      const imageUrl = upload.secure_url;
 
-      const postId = newPost._id;
+      if (imageUrl !== "") {
+        const newPost = new Post({ author: userId, title, imageUrl, caption });
+        await newPost.save();
 
-      await User.findByIdAndUpdate(userId, { $push: { posts : { post: postId }} });
+        const postId = newPost._id;
 
-      res.status(201).json({ message: "Post Uploaded", postId });
+        await User.findByIdAndUpdate(userId, {
+          $push: { posts: { post: postId } },
+        });
+
+        res.status(201).json({ message: "Post Uploaded", postId });
+      } else {
+        res.json({ message: "Cloudinary Error!" });
+      }
     } else {
-      res.json({ message: "select image" });
+      res.json({ message: "Kindly Write Title!" });
     }
   } catch (error) {
-    res.json({ message: error });
+    res.json({ message: "kindly Select Image" });
     console.log(error);
   }
 };
@@ -37,7 +44,7 @@ const createNewpostHandler = async (req, res) => {
 const likeHandler = async (req, res) => {
   try {
     const userId = req.info._id;
-    const { postId } = req.query; 
+    const { postId } = req.query;
 
     const post = await Post.findById(postId);
 
@@ -48,32 +55,26 @@ const likeHandler = async (req, res) => {
     if (!post) {
       res.json({ message: "Post not found!" });
     } else {
-
-
       if (alreadyLiked === -1) {
-
-        await post.likeCounts.push({user : userId}); // simple javascript array method
+        await post.likeCounts.push({ user: userId }); // simple javascript array method
         await User.findByIdAndUpdate(userId, { $push: { likedPosts: postId } });
         const updatePost = await post.save();
 
         if (updatePost) {
-          res.json({ message: `U Liked post _${postId}`});
+          res.json({ message: `U Liked post _${postId}` });
         }
       } else {
-
-        await post.likeCounts.splice(alreadyLiked , 1)
+        await post.likeCounts.splice(alreadyLiked, 1);
         await User.findByIdAndUpdate(userId, { $pull: { likedPosts: postId } });
-        const savePost = await post.save()
+        const savePost = await post.save();
 
-        if(savePost){
-
+        if (savePost) {
           res.json({ message: `U unliked post_${postId}` });
         }
-            
       }
     }
   } catch (error) {
-    res.json({ message: error  + "some error"});
+    res.json({ message: error + "some error" });
   }
 };
 
@@ -115,22 +116,22 @@ const deletePostHandler = async (req, res) => {
     const isUser = await User.findById(userId);
 
     if (isUser) {
-      const deletePost = await Post.findByIdAndDelete(postId);
-      // const indexOfPostInUserArr = await isUser.posts.findIndex(
-      //   (_id) => _id.toString() === postId
-      // );
-      // console.log(indexOfPostInUserArr);
-      // const delFromUserArr = await isUser.posts.splice(0, 1);
-      // console.log(delFromUserArr)
+      const indexOfPostInPostsArr = await isUser.posts.findIndex(
+        (param) => param.post._id.toString() === postId
+      );
 
-      const delfromArr = await User.findByIdAndUpdate(userId, {
-        $pull: { posts: postId },
-      });
+      if (indexOfPostInPostsArr > -1) {
+        await Post.findByIdAndDelete(postId);
+        await isUser.posts.splice(indexOfPostInPostsArr, 1);
+        const updatePost = await isUser.save();
 
-      if (deletePost && delfromArr) {
-        res.json({ message: "Post Deleted" });
+        if (updatePost) {
+          res.json({ message: "Post Deleted!" });
+        } else {
+          res.json({ message: "Some Error : post not found  " });
+        }
       } else {
-        res.json({ message: "Some Error : post not found  " });
+        res.json({ message: "Cant del Post" });
       }
     } else {
       res.json({ message: "User not Found" });
@@ -151,13 +152,11 @@ const deleteCommentHandler = async (req, res) => {
       (comment) => comment._id.toString() === commentId
     );
 
-    console.log(indexOfdelComment);
-
     const delComment = await post.comments.splice(indexOfdelComment, 1);
 
     if (delComment) {
       await post.save();
-      res.json({ message: "comment deleted " });
+      res.json({ message: "Comment deleted!" });
     } else {
       res.json({ message: "comment not found" });
     }
@@ -202,8 +201,8 @@ const getAllposts = async (req, res) => {
   try {
     const allposts = await Post.find().populate([
       {
-        path: 'author',
-        model: 'User',
+        path: "author",
+        model: "User",
       },
 
       {

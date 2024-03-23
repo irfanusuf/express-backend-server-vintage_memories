@@ -3,14 +3,21 @@ const User = require("./userModel");
 // const uuid =require("uuid")
 
 const postschema = mongoose.Schema({
+
+
+
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+
+
   title: String,
   imageUrl: String,
   caption: String,
 
+
+  
   likeCounts: [
     {
       user: {
@@ -19,6 +26,9 @@ const postschema = mongoose.Schema({
       },
     },
   ],
+
+
+
   comments: [
     {
       comment: String,
@@ -28,6 +38,9 @@ const postschema = mongoose.Schema({
       },
     },
   ],
+
+
+
   shareCounts: [
     {
       user: {
@@ -36,6 +49,9 @@ const postschema = mongoose.Schema({
       },
     },
   ],
+
+
+
 });
 
 const Post = mongoose.model("Post", postschema);

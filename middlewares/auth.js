@@ -14,8 +14,10 @@ const IsAuthenticated = async (req, res, next) => {
         } else {
 
 
-          req.info = decode;
+          req.info= decode;
 
+
+      
           return next();
         }
       });

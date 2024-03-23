@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const Post = require("./postModel");
 
 const User = mongoose.model("User", {
+
+
+
+  
   profilepIcUrl: String,
   username: { type: String, unique: true },
   email: { type: String, unique: true },

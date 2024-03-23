@@ -3,8 +3,8 @@ const mongoose = require("mongoose"); // importing mongoose libarary which is us
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors =require('cors')
-const multMidWare = require("./mddlewares/multer");
-const IsAuthenticated = require("./mddlewares/auth");
+const multMidWare = require("./middlewares/multer");
+const IsAuthenticated = require("./middlewares/auth");
 const {
   registerController,
   loginController,
@@ -57,6 +57,8 @@ app.post("/user/forgotPassword", forgotpassController);
 app.post("/user/changePassword", changepassController);
 app.post("/user/logout", logoutController);
 app.post("/user/delete", deleteController);
+
+
 app.post("/user/follow" , followUserHandler)  // home work
 
 app.get("/user/getFollowers", (req, res) => {
@@ -66,17 +68,16 @@ app.get("/user/getFollowing", (req, res) => {
   res.send("No following");
 });
 
-// all the routes for posts are below
 
-app.post("/post/new", multMidWare, createNewpostHandler);
+
+// all the routes for posts are below
+ 
+app.post("/post/new", multMidWare, IsAuthenticated  ,createNewpostHandler);
 app.post("/post/deletePost",IsAuthenticated ,  deletePostHandler);
 app.post("/post/likes", IsAuthenticated, likeHandler);     // depends on user ..... like and unlike can work from single handler 
 app.post("/post/comment", IsAuthenticated, commentHandler);
 app.post("/post/deleteCommment",IsAuthenticated , deleteCommentHandler);
 app.post("/post/sharePost",IsAuthenticated , sharePostHandler);
-
-
-
 app.get("/posts", IsAuthenticated, getAllposts);
 
 

@@ -197,18 +197,13 @@ const followUserHandler = async (req, res) => {
 const getUser = async (req, res) => {
   const _id = req.query.userId;
 
-  const user = await User.findById(_id).populate(
-  [
-     {
-        path: 'posts.post',
-        model: 'Post',
-      
-     }
-
-  ]
-
-
-  );       //time complexity log n
+  const user = await User.findById(_id)
+  .populate([
+    {
+      path: "posts.post",
+      model: "Post",
+    },
+  ]); //time complexity log n
 
   if (user) {
     res.json({ message: "user Found", user });
