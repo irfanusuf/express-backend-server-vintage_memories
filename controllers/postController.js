@@ -41,6 +41,45 @@ const createNewpostHandler = async (req, res) => {
   }
 };
 
+
+const deletePostHandler = async (req, res) => {
+  try {
+    const userId = req.info._id;
+
+    const { postId } = req.query;
+
+    const isUser = await User.findById(userId);
+
+    if (isUser) {
+      const indexOfPostInPostsArr = await isUser.posts.findIndex(
+        (param) => param.post._id.toString() === postId
+      );
+
+
+      if (indexOfPostInPostsArr > -1) {
+        await Post.findByIdAndDelete(postId);
+
+        await isUser.posts.splice(indexOfPostInPostsArr, 1);
+
+        const updatePost = await isUser.save();
+
+        if (updatePost) {
+          res.json({ message: "Post Deleted!"});
+        } else {
+          res.json({ message: "Some Error : post not found!"});
+        }
+      } else {
+        res.json({ message: "Cant del Post !" });
+      }
+    } else {
+      res.json({ message: "User not Found" });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
 const likeHandler = async (req, res) => {
   try {
     const userId = req.info._id;
@@ -57,7 +96,7 @@ const likeHandler = async (req, res) => {
     } else {
       if (alreadyLiked === -1) {
         await post.likeCounts.push({ user: userId }); // simple javascript array method
-        await User.findByIdAndUpdate(userId, { $push: { likedPosts: postId } });
+        await User.findByIdAndUpdate(userId, { $push: { likedPosts: postId } });  // method of mongoose 
         const updatePost = await post.save();
 
         if (updatePost) {
@@ -78,6 +117,8 @@ const likeHandler = async (req, res) => {
   }
 };
 
+
+
 const commentHandler = async (req, res) => {
   try {
     const userId = req.info._id;
@@ -85,18 +126,25 @@ const commentHandler = async (req, res) => {
     const comment = req.body.comment;
     const { postId } = req.query;
 
+    // const user = await User.findById(userId);
+
     const post = await Post.findById(postId);
 
-    if (post) {
-      // const addComment = await Post.findByIdAndUpdate(_id , {
-
-      //     $push : {comments : {comment : comment , username  : username }}
-      //   })
-
+    if (post ) {
       await post.comments.push({ comment: comment, user: userId });
-      const commentAdded = await post.save();
+      const updatePost = await post.save();
 
-      if (commentAdded) {
+
+
+      // const mycomment = post.comments[post.comments.length - 1];
+      // const commentId = mycomment._id.toString();
+
+      // await User.findByIdAndUpdate(userId, { $push: { commentsGiven: commentId } });
+
+      // await user.commentsGiven.push(commentId);
+      // const updateUser = await user.save();
+
+      if (updatePost) {
         res.json({ message: "comment Added" });
       } else {
         res.json({ message: "Some Error " });
@@ -109,61 +157,56 @@ const commentHandler = async (req, res) => {
   }
 };
 
-const deletePostHandler = async (req, res) => {
-  try {
-    const userId = req.info._id;
-    const { postId } = req.query;
-    const isUser = await User.findById(userId);
-
-    if (isUser) {
-      const indexOfPostInPostsArr = await isUser.posts.findIndex(
-        (param) => param.post._id.toString() === postId
-      );
-
-      if (indexOfPostInPostsArr > -1) {
-        await Post.findByIdAndDelete(postId);
-        await isUser.posts.splice(indexOfPostInPostsArr, 1);
-        const updatePost = await isUser.save();
-
-        if (updatePost) {
-          res.json({ message: "Post Deleted!" });
-        } else {
-          res.json({ message: "Some Error : post not found  " });
-        }
-      } else {
-        res.json({ message: "Cant del Post" });
-      }
-    } else {
-      res.json({ message: "User not Found" });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 const deleteCommentHandler = async (req, res) => {
   try {
     const { postId } = req.query;
     const { commentId } = req.query;
+    const userId = req.info._id;
 
+    const user = await User.findById(userId);
     const post = await Post.findById(postId);
 
-    const indexOfdelComment = await post.comments.findIndex(
-      (comment) => comment._id.toString() === commentId
-    );
+    if (user && post) {
 
-    const delComment = await post.comments.splice(indexOfdelComment, 1);
+      const indexOfdelComment = await post.comments.findIndex(
+        (object) => object._id.toString() === commentId
 
-    if (delComment) {
-      await post.save();
-      res.json({ message: "Comment deleted!" });
+      );
+    
+
+      // const indexofCommentinUsersArr = await user.commentsGiven.findIndex(
+      //   (object) => object._id.toString() === commentId
+      // );
+
+      // && indexofCommentinUsersArr > -1
+
+      if (indexOfdelComment > -1 ) { 
+        await post.comments.splice(indexOfdelComment, 1);
+        await post.save();
+
+
+        // await user.commentsGiven.splice(
+        //   indexofCommentinUsersArr,
+        //   1
+        // );
+        // await user.save()
+        res.json({ message: "Comment deleted!" });
+       
+      } else {
+        res.json({ message: "Cant Del other's Comment!" });
+      }
     } else {
-      res.json({ message: "comment not found" });
+      res.json({ message: "post or user not found!" });
     }
   } catch (err) {
     console.log(err);
   }
 };
+
+
+
+
 
 const sharePostHandler = async (req, res) => {
   const { email } = req.body;
@@ -231,9 +274,9 @@ const getAllposts = async (req, res) => {
 
 module.exports = {
   createNewpostHandler,
+  deletePostHandler,
   likeHandler,
   commentHandler,
-  deletePostHandler,
   deleteCommentHandler,
   sharePostHandler,
   getAllposts,

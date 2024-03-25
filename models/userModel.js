@@ -23,6 +23,10 @@ const User = mongoose.model("User", {
 
   likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
 
+
+
+  commentsGiven : [{ type: mongoose.Schema.Types.ObjectId}],
+
   userFollowers: [],
   userFollowing: [],
 });
