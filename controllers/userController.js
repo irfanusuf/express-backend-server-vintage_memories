@@ -14,7 +14,7 @@ const registerController = async (req, res) => {
       if (!existingUser) {
         const hashedPassword = await bcrypt.hash(password, 10);
         const upload = await cloudinary.v2.uploader.upload(image, {
-          folder: "socialApp-profilepics",
+          folder: "polaroid_mems_profilepics",
         });
         if (upload) {
           const profilepIcUrl = upload.secure_url;
@@ -33,7 +33,7 @@ const registerController = async (req, res) => {
           // });
           res.json({ message: "User Created" });
         } else {
-          res.json({ message: "Cloudinary Error & mail not sent" });
+          res.json({ message: "Cloudinary Error!" });
         }
       } else {
         res.json({ message: "user Already Exits" });
@@ -46,7 +46,7 @@ const registerController = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
+// done 
 const loginController = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -82,7 +82,7 @@ const loginController = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
+// done 
 const logoutController = async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -190,10 +190,19 @@ const deleteController = async (req, res) => {
   }
 };
 
+
+
+
+
+
 const followUserHandler = async (req, res) => {
-  //home work
+
+  res.json({message : "home Work"})
+  //home work   // seb ka homework 
 };
 
+
+// done
 const getUser = async (req, res) => {
   const _id = req.query.userId;
 

@@ -10,8 +10,8 @@ const User = mongoose.model("User", {
   username: { type: String, unique: true },
   email: { type: String, unique: true },
   password: { type: String, required: true },
-
-  
+  bio : String ,
+  links : String,
   posts: [
     {
       post: {
@@ -22,13 +22,9 @@ const User = mongoose.model("User", {
   ],
 
   likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
-
-
-
   commentsGiven : [{ type: mongoose.Schema.Types.ObjectId}],
-
-  userFollowers: [],
-  userFollowing: [],
+  userFollowers: [{type : mongoose.Schema.Types.ObjectId , ref : "User" }  ],
+  userFollowing: [{type : mongoose.Schema.Types.ObjectId , ref : "User" }  ],
 });
 
 module.exports = User;

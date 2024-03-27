@@ -11,9 +11,9 @@ const postschema = mongoose.Schema({
     ref: "User",
   },
 
-
   title: String,
   imageUrl: String,
+  imgPublicID : String,
   caption: String,
 
 

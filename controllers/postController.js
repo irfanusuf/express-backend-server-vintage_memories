@@ -3,6 +3,7 @@ const cloudinary = require("../utils/cloudinary");
 const User = require("../models/userModel");
 const transporter = require("../utils/nodemailer");
 
+//done 
 const createNewpostHandler = async (req, res) => {
   try {
     const { title, caption, image } = req.body;
@@ -13,13 +14,15 @@ const createNewpostHandler = async (req, res) => {
       const userId = req.info._id;
 
       const upload = await cloudinary.v2.uploader.upload(image, {
-        folder: "socialApp",
+        folder: "Polaroid_mems",
       });
 
+    
+      const imgPublicID = upload.public_id
       const imageUrl = upload.secure_url;
 
-      if (imageUrl !== "") {
-        const newPost = new Post({ author: userId, title, imageUrl, caption });
+      if (upload) {
+        const newPost = new Post({ author: userId, title, imageUrl, caption ,imgPublicID });
         await newPost.save();
 
         const postId = newPost._id;
@@ -28,7 +31,7 @@ const createNewpostHandler = async (req, res) => {
           $push: { posts: { post: postId } },
         });
 
-        res.status(201).json({ message: "Post Uploaded", postId });
+        res.status(201).json({ message: "Post Uploaded" });
       } else {
         res.json({ message: "Cloudinary Error!" });
       }
@@ -36,17 +39,17 @@ const createNewpostHandler = async (req, res) => {
       res.json({ message: "Kindly Write Title!" });
     }
   } catch (error) {
-    res.json({ message: "kindly Select Image" });
+    res.json({ message: error.message });
     console.log(error);
   }
 };
-
-
+// done
 const deletePostHandler = async (req, res) => {
   try {
     const userId = req.info._id;
 
     const { postId } = req.query;
+    const {imgPublicID} = req.query
 
     const isUser = await User.findById(userId);
 
@@ -55,18 +58,20 @@ const deletePostHandler = async (req, res) => {
         (param) => param.post._id.toString() === postId
       );
 
-
       if (indexOfPostInPostsArr > -1) {
-        await Post.findByIdAndDelete(postId);
+
+        await Post.findByIdAndDelete(postId);    //log n
 
         await isUser.posts.splice(indexOfPostInPostsArr, 1);
 
         const updatePost = await isUser.save();
 
-        if (updatePost) {
-          res.json({ message: "Post Deleted!"});
+        const deleteFromCloudinary = await cloudinary.v2.uploader.destroy(imgPublicID)
+
+        if (updatePost && deleteFromCloudinary ) {
+          res.json({ message: "Post Deleted!" });
         } else {
-          res.json({ message: "Some Error : post not found!"});
+          res.json({ message: "Some Error!" });
         }
       } else {
         res.json({ message: "Cant del Post !" });
@@ -78,8 +83,7 @@ const deletePostHandler = async (req, res) => {
     console.log(error);
   }
 };
-
-
+// done
 const likeHandler = async (req, res) => {
   try {
     const userId = req.info._id;
@@ -96,7 +100,7 @@ const likeHandler = async (req, res) => {
     } else {
       if (alreadyLiked === -1) {
         await post.likeCounts.push({ user: userId }); // simple javascript array method
-        await User.findByIdAndUpdate(userId, { $push: { likedPosts: postId } });  // method of mongoose 
+        await User.findByIdAndUpdate(userId, { $push: { likedPosts: postId } }); // method of mongoose
         const updatePost = await post.save();
 
         if (updatePost) {
@@ -116,35 +120,30 @@ const likeHandler = async (req, res) => {
     res.json({ message: error + "some error" });
   }
 };
-
-
-
+//done
 const commentHandler = async (req, res) => {
   try {
     const userId = req.info._id;
-
     const comment = req.body.comment;
     const { postId } = req.query;
 
-    // const user = await User.findById(userId);
+    const user = await User.findById(userId);
 
     const post = await Post.findById(postId);
 
-    if (post ) {
+    if (post && user) {
       await post.comments.push({ comment: comment, user: userId });
       const updatePost = await post.save();
 
+      const n = post.comments.length;
+      const mycommentId = post.comments[n - 1]._id.toString();
 
-
-      // const mycomment = post.comments[post.comments.length - 1];
-      // const commentId = mycomment._id.toString();
+      await user.commentsGiven.push(mycommentId);
+      const updateUser = await user.save();
 
       // await User.findByIdAndUpdate(userId, { $push: { commentsGiven: commentId } });
 
-      // await user.commentsGiven.push(commentId);
-      // const updateUser = await user.save();
-
-      if (updatePost) {
+      if (updatePost && updateUser) {
         res.json({ message: "comment Added" });
       } else {
         res.json({ message: "Some Error " });
@@ -156,8 +155,7 @@ const commentHandler = async (req, res) => {
     console.log(error);
   }
 };
-
-
+// done 
 const deleteCommentHandler = async (req, res) => {
   try {
     const { postId } = req.query;
@@ -168,31 +166,21 @@ const deleteCommentHandler = async (req, res) => {
     const post = await Post.findById(postId);
 
     if (user && post) {
-
       const indexOfdelComment = await post.comments.findIndex(
         (object) => object._id.toString() === commentId
-
       );
-    
 
-      // const indexofCommentinUsersArr = await user.commentsGiven.findIndex(
-      //   (object) => object._id.toString() === commentId
-      // );
+      const indexofcommentinUserArr = await user.commentsGiven.findIndex(
+        (object) => object._id.toString() === commentId
+      );
 
-      // && indexofCommentinUsersArr > -1
 
-      if (indexOfdelComment > -1 ) { 
+      if (indexOfdelComment > -1 && indexofcommentinUserArr > -1) {
         await post.comments.splice(indexOfdelComment, 1);
         await post.save();
-
-
-        // await user.commentsGiven.splice(
-        //   indexofCommentinUsersArr,
-        //   1
-        // );
-        // await user.save()
+        await user.commentsGiven.splice(indexofcommentinUserArr, 1);
+        await user.save();
         res.json({ message: "Comment deleted!" });
-       
       } else {
         res.json({ message: "Cant Del other's Comment!" });
       }
@@ -205,9 +193,7 @@ const deleteCommentHandler = async (req, res) => {
 };
 
 
-
-
-
+ // post pone 
 const sharePostHandler = async (req, res) => {
   const { email } = req.body;
   const { postId } = req.query;
@@ -240,6 +226,8 @@ const sharePostHandler = async (req, res) => {
   }
 };
 
+
+// done 
 const getAllposts = async (req, res) => {
   try {
     const allposts = await Post.find().populate([
