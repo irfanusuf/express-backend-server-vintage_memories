@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 const Post = require("./postModel");
 
 const User = mongoose.model("User", {
-
-
-
-  
   profilepIcUrl: String,
   username: { type: String, unique: true },
   email: { type: String, unique: true },
@@ -20,7 +16,6 @@ const User = mongoose.model("User", {
       },
     },
   ],
-
   likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
   commentsGiven : [{ type: mongoose.Schema.Types.ObjectId}],
   userFollowers: [{type : mongoose.Schema.Types.ObjectId , ref : "User" }  ],

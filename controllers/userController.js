@@ -46,7 +46,7 @@ const registerController = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-// done 
+// done
 const loginController = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -82,7 +82,7 @@ const loginController = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-// done 
+// done
 const logoutController = async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -154,7 +154,7 @@ const changepassController = async (req, res) => {
       res.json({ message: " somethig went wrong " });
     }
 
-    // this methods find user be id and loads it in memory then the second instruction changes
+    // this methods find user by id and loads it in memory then the second instruction changes
     // paswword and the new user is loaded  again
     // in memory
     // const validUser = await User.findById({ _id });
@@ -190,24 +190,50 @@ const deleteController = async (req, res) => {
   }
 };
 
-
-
-
-
-
 const followUserHandler = async (req, res) => {
+  try {
+    const userId = req.info._id;
+    const { userToFollow } = req.query;
 
-  res.json({message : "home Work"})
-  //home work   // seb ka homework 
+    const isUser = await User.findById(userId);
+    const isUserTofollow = await User.findById(userToFollow);
+
+    if (isUser && isUserTofollow) {
+      // const alreadyFollowed = await isUserTofollow.userFollowers.includes(userId)
+      const indexofFollower = await isUserTofollow.userFollowers.findIndex(
+        (object) => object._id.toString() === userId
+      );
+
+      const indexOfFollowing = await isUser.userFollowing.findIndex(
+        (object) => object._id.toString() === userToFollow
+      );
+
+      if (indexofFollower > -1 && indexOfFollowing > -1) {
+        await isUserTofollow.userFollowers.splice(indexofFollower, 1);
+        await isUserTofollow.save();
+        await isUser.userFollowing.splice(indexOfFollowing, 1);
+        await isUser.save();
+        res.json({ message: "u unfollowed the user" });
+      } else {
+        await isUserTofollow.userFollowers.push(userId);
+        await isUserTofollow.save();
+        await isUser.userFollowing.push(userToFollow);
+        await isUser.save();
+        res.json({ message: "u followed the user" });
+      }
+    } else {
+      res.status(404).json({ message: "user Not Found!" });
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
-
 
 // done
 const getUser = async (req, res) => {
   const _id = req.query.userId;
 
-  const user = await User.findById(_id)
-  .populate([
+  const user = await User.findById(_id).populate([
     {
       path: "posts.post",
       model: "Post",

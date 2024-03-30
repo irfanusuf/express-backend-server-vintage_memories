@@ -24,7 +24,8 @@ const {
   deletePostHandler,
   deleteCommentHandler,
   sharePostHandler,
-  getAllposts
+  getAllposts,
+  getPostsofFollowing
 } = require("./controllers/postController");
 
 const app = express(); //  declaring a variable  app in which express function is called
@@ -57,17 +58,7 @@ app.post("/user/forgotPassword", forgotpassController);
 app.post("/user/changePassword", changepassController);
 app.post("/user/logout", logoutController);
 app.post("/user/delete", deleteController);
-
-
-app.post("/user/follow" , followUserHandler)  // home work
-
-app.get("/user/getFollowers", (req, res) => {
-  res.send("No followers");
-});
-app.get("/user/getFollowing", (req, res) => {
-  res.send("No following");
-});
-
+app.post("/user/follow" ,IsAuthenticated, followUserHandler)  
 
 
 // all the routes for posts are below
@@ -79,6 +70,7 @@ app.post("/post/comment", IsAuthenticated, commentHandler);
 app.post("/post/deleteCommment",IsAuthenticated , deleteCommentHandler);
 app.post("/post/sharePost",IsAuthenticated , sharePostHandler);
 app.get("/posts", IsAuthenticated, getAllposts);
+app.get("/post/following" ,IsAuthenticated, getPostsofFollowing)     // home work
 
 
 
