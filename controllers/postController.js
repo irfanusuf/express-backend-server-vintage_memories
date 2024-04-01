@@ -168,18 +168,22 @@ const deleteCommentHandler = async (req, res) => {
     const { commentId } = req.query;     
     const { commentUser } = req.query;   // commenting user 
     const userId = req.info._id;     // logged in user 
-    const post = await Post.findById(postId);
-    const user = await User.findById(userId);
-    const commentingUser = await User.findById(commentUser);
+
+    const post = await Post.findById(postId);   // find post in db
+    const user = await User.findById(userId);  // find logged in user in db
+    const commentingUser = await User.findById(commentUser); // find commentUser in db
+
     const authorofPost = await post.author.toString();  // author userid
     
 
     const indexOfdelComment = await post.comments.findIndex(
       (object) => object._id.toString() === commentId
     );
+
     const indexinLoggedUserArr = await user.commentsGiven.findIndex(
       (object) => object._id.toString() === commentId
     );
+
     const indexincommentingUserArr =
       await commentingUser.commentsGiven.findIndex(
         (object) => object._id.toString() === commentId
@@ -194,7 +198,7 @@ const deleteCommentHandler = async (req, res) => {
         await commentingUser.commentsGiven.splice(indexincommentingUserArr, 1);
         await commentingUser.save();
 
-        res.json({ message: "Comment deleted!" });
+        res.status(201).json({ message: "Comment deleted!" });
       }
 
     }
@@ -208,7 +212,7 @@ const deleteCommentHandler = async (req, res) => {
       await user.commentsGiven.splice(indexinLoggedUserArr, 1);
       await user.save();
 
-      res.json({ message: "Comment deleted!" });
+      res.status(201).json({ message: "Comment deleted!" });
 
     } else {
       res.json({ message: "Can't del others comment" });
