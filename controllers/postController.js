@@ -164,17 +164,16 @@ const commentHandler = async (req, res) => {
 // done
 const deleteCommentHandler = async (req, res) => {
   try {
-    const { postId } = req.query;   
-    const { commentId } = req.query;     
-    const { commentUser } = req.query;   // commenting user 
-    const userId = req.info._id;     // logged in user 
+    const { postId } = req.query;
+    const { commentId } = req.query;
+    const { commentUser } = req.query; // commenting user
+    const userId = req.info._id; // logged in user
 
-    const post = await Post.findById(postId);   // find post in db
-    const user = await User.findById(userId);  // find logged in user in db
+    const post = await Post.findById(postId); // find post in db
+    const user = await User.findById(userId); // find logged in user in db
     const commentingUser = await User.findById(commentUser); // find commentUser in db
 
-    const authorofPost = await post.author.toString();  // author userid
-    
+    const authorofPost = await post.author.toString(); // author userid
 
     const indexOfdelComment = await post.comments.findIndex(
       (object) => object._id.toString() === commentId
@@ -189,7 +188,6 @@ const deleteCommentHandler = async (req, res) => {
         (object) => object._id.toString() === commentId
       );
 
-
     if (authorofPost === userId) {
       if (indexOfdelComment > -1 && indexincommentingUserArr > -1) {
         await post.comments.splice(indexOfdelComment, 1);
@@ -200,20 +198,14 @@ const deleteCommentHandler = async (req, res) => {
 
         res.status(201).json({ message: "Comment deleted!" });
       }
-
-    }
-    
-    else if (indexOfdelComment > -1 && indexinLoggedUserArr > -1) {
+    } else if (indexOfdelComment > -1 && indexinLoggedUserArr > -1) {
       await post.comments.splice(indexOfdelComment, 1);
       await post.save();
-
-
 
       await user.commentsGiven.splice(indexinLoggedUserArr, 1);
       await user.save();
 
       res.status(201).json({ message: "Comment deleted!" });
-
     } else {
       res.json({ message: "Can't del others comment" });
     }
@@ -289,11 +281,34 @@ const getAllposts = async (req, res) => {
 };
 
 
+const getPostsofFollowing = async (req, res) => {
+  const userId = req.info._id;
 
-const getPostsofFollowing = async (req, res ) =>{
+  const user = await User.findById(userId);
 
-// home work 
-}
+  if (user) {
+    const posts = await Post.find({ author: { $in: user.userFollowing } }).populate(
+      [
+        {
+          path : "author",
+          model : "User"
+        },
+        {
+          path : "likeCounts.user",
+          model : "User"
+        },
+        {
+          path : "comments.user",
+          model : "User"
+        }
+      ]
+    );
+    const length = posts.length 
+    res.json({ message: "post of following",length ,  posts  });
+  } else {
+    res.json({ message: "user not found" });
+  }
+};
 
 module.exports = {
   createNewpostHandler,
@@ -303,5 +318,5 @@ module.exports = {
   deleteCommentHandler,
   sharePostHandler,
   getAllposts,
-  getPostsofFollowing
+  getPostsofFollowing,
 };
